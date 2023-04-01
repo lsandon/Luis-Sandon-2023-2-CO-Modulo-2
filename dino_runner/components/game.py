@@ -16,6 +16,7 @@ class Game:
         self.x_pos_bg = 0
         self.y_pos_bg = 380
         self.player = Dinosour()
+        
 
 
     def run(self):
@@ -33,7 +34,8 @@ class Game:
                 self.playing = False
 
     def update(self):
-        pass
+        user_input = pygame.key.get_pressed()
+        self.player.update(user_input)
 
     def draw(self):
         self.clock.tick(FPS)
