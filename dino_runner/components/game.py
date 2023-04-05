@@ -4,6 +4,7 @@ from dino_runner.components.obstacles.obstacle_manager import ObstacleManager
 from dino_runner.utils.constants import BG, ICON, SCREEN_HEIGHT, SCREEN_WIDTH, TITLE, FPS, FONT_STYLE
 from dino_runner.components.dinosaur import Dinosour
 from dino_runner.components.menu import Menu
+from dino_runner.components.contable import Contable
 
 
 class Game:
@@ -20,17 +21,18 @@ class Game:
         self.y_pos_bg = 380
         self.player = Dinosour()
         self.obstacle_manager = ObstacleManager()
-        self.menu = Menu(self.screen, "Press any key to start")
+        self.menu = Menu(self.screen)
         self.running = False
-        self.score = 0
-        self.death_count = 0
+        self.score = Contable()
+        self.death_count = Contable()
+        self.highest_score = Contable()
 
     def run(self):
         # Game loop: events - update - draw
         self.playing = True
         self.obstacle_manager.reset_obstacles()
         self.game_speed = self.GAME_SPEED
-        self.score = 0
+        self.score = Contable() # Initialize self.score to be an instance of the Contable class
         while self.playing:
             self.events()
             self.update()
@@ -55,6 +57,7 @@ class Game:
         self.player.update(user_input)
         self.obstacle_manager.update(self)
         self.update_score()
+        self.score.update()
         
 
     def draw(self):
@@ -80,22 +83,34 @@ class Game:
         self.menu.reset_screen_color(self.screen)
         half_screen_width = SCREEN_WIDTH // 2
         half_screen_height = SCREEN_HEIGHT // 2
-        self.screen.blit(ICON, (half_screen_width - 50, half_screen_height - 140))
-        if self.death_count == 0:
-            self.menu.draw(self.screen)
-        else:
-            self.menu.update_message("Dino has died :( ")
-            self.menu.draw(self.screen)
-        self.menu.update(self)
 
+        if self.death_count.count == 0:
+            self.menu.draw(self.screen, "Press any key to start ...")
+        else:
+            self.update_highest_score()
+            self.menu.draw(self.screen, "Game Over. Press any key to restart ...")
+            self.menu.draw(self.screen, f"Your Score: {self.score.count}", half_screen_width, 350, )
+            self.menu.draw(self.screen, f"Highest score: {self.highest_score.count}", half_screen_width, 400, )
+            self.menu.draw(self.screen, f"Total deaths: {self.death_count.count}", half_screen_width, 450, )
+
+        self.screen.blit(ICON, (half_screen_width - 50, half_screen_height - 140))
+        self.menu.update(self)
+        
     def update_score(self):
-        self.score += 1
-        if self.score % 100 == 0 and self.game_speed < 500:
-            self.game_speed += 5
+        self.score.set_count(self.score.count + 1)
+        if self.score.count % 100 == 0:
+            # Increment game speed based on score
+            speed_increment = self.score.count * 0.05
+            self.game_speed += speed_increment  
+
+    def update_highest_score(self):
+        if self.score.count > self.highest_score.count:
+            self.highest_score.set_count(self.score.count)
+        
     
     def draw_score(self):
         font = pygame.font.Font(FONT_STYLE, 30)
-        text = font.render(f"Score: {self.score}", True, (0, 0, 0))
+        text = font.render(f"Score: {self.score.count}", True, (0, 0, 0))
         text_rect = text.get_rect()
         text_rect.center = (1000 , 50)
         self.screen.blit(text, text_rect)
