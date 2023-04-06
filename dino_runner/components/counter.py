@@ -2,7 +2,8 @@ import pygame
 
 from dino_runner.utils.constants import FONT_STYLE
 
-class Contable:
+
+class Counter:
     def __init__(self):
         self.count = 0
 
@@ -11,9 +12,9 @@ class Contable:
 
     def draw(self, screen):
         font = pygame.font.Font(FONT_STYLE, 30)
-        text = font.render(f"Score: {self.count}", True, (0, 0, 0))
+        text = font.render(f'Score: {self.count}', True, (0, 0, 0))
         text_rect = text.get_rect()
-        text_rec_center = (1000, 50)
+        text_rect.center = (1000, 50)
         screen.blit(text, text_rect)
 
     def reset(self):
